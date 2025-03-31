@@ -1,12 +1,9 @@
 "use client";
-
 import { auth, provider } from "@/app/firebase/config";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
-
 import { FacebookAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import Image from "next/image";
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
