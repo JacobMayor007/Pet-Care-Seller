@@ -88,7 +88,7 @@ export default function RegisterAsProvider() {
       // Add user data to Firestore
       const userRef = doc(db, "Users", res.user.uid);
       await setDoc(userRef, {
-        User_Name: formData.fName + formData.lName,
+        User_Name: formData.fName + " " + formData.lName,
         User_Email: formData.email,
         User_UID: res.user.uid,
         TermsAndConditions: checkBox,
@@ -96,7 +96,7 @@ export default function RegisterAsProvider() {
       });
       const sellerRef = doc(db, "seller", res.user.uid);
       await setDoc(sellerRef, {
-        seller_fullName: formData.fName + formData.lName,
+        seller_fullName: formData.fName + " " + formData.lName,
         seller_email: formData.email,
         seller_uid: res.user.uid,
         seller_info: {
@@ -403,11 +403,14 @@ export default function RegisterAsProvider() {
                     if (
                       event.key == "." ||
                       event.key === "-" ||
-                      event.key === "e"
+                      event.key === "e" ||
+                      event.key === "0"
                     ) {
                       event.preventDefault();
                     }
                   }}
+                  maxLength={11}
+                  max={11}
                   className="h-12 w-full outline-none text-base font-hind px-2 [&::-webkit-inner-spin-button]:appearance-none"
                   value={formData.contact}
                   onChange={(e) =>

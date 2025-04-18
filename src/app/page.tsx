@@ -15,6 +15,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import dayjs, { Dayjs } from "dayjs";
 import ProductNavigation from "./ProductNavigation/page";
+import Link from "next/link";
+import { isAuthenticate } from "./fetchData/fetchUserData";
 
 interface Product {
   id?: string;
@@ -56,12 +58,24 @@ interface Orders {
   OC_TotalPrice?: number;
 }
 
-export default function Overview() {
+export default function Home() {
+  const router = useRouter();
   const [userId, setUserId] = useState("");
   const [userProduct, setUserProduct] = useState<Product[]>([]);
   const [order, setOrder] = useState<Orders[]>([]);
   const [userTotalProduct, setUserTotalProduct] = useState(0);
   const [totalOrders, setTotalOrders] = useState<number | null>(0);
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const login = await isAuthenticate();
+      if (login) {
+        router.push("/");
+      }
+    };
+
+    checkAuthentication();
+  }, [router]);
 
   useEffect(() => {
     const myProducts = async () => {
@@ -105,7 +119,6 @@ export default function Overview() {
     fetchOrders();
   }, [userId]);
 
-  const router = useRouter();
   const units: number = totalOrders || 0;
   const pendingUnits = totalOrders || 0;
   const pending: number = (pendingUnits / units) * 100;
@@ -136,6 +149,14 @@ export default function Overview() {
   const totalPrice = order.reduce((accumulator, currentValue) => {
     return accumulator + Number(currentValue?.OC_Products?.OC_ProductPrice);
   }, 0);
+
+  if (!userId) {
+    return (
+      <div>
+        <div></div>
+      </div>
+    );
+  }
 
   return (
     <div className={userId ? `bg-[#FEFEFE] pb-5` : `hidden`}>
@@ -246,7 +267,7 @@ export default function Overview() {
                         : `text-3xl font-hind font-semibold`
                     }
                   >
-                    {totalOrders === 0 ? `You have no orders` : `${pending}%`}
+                    {totalOrders === 0 ? `You have no orders` : `${pending}`}
                   </h1>
                   <p className="font-montserrat font-bold text-lg text-[#565656]">
                     {pendingUnits} / {units}
@@ -255,7 +276,7 @@ export default function Overview() {
                 <div className={`h-2 w-full bg-gray-300 rounded-full`}>
                   <div
                     className={`h-full bg-[#22A9FD] rounded-full`}
-                    style={{ width: `${pending}%` }}
+                    style={{ width: `${pending}` }}
                   />
                 </div>
               </div>
@@ -271,7 +292,7 @@ export default function Overview() {
                         : `text-3xl font-hind font-semibold`
                     }
                   >
-                    {totalOrders === 0 ? `You have no orders` : `${shipped}%`}
+                    {totalOrders === 0 ? `You have no orders` : `${shipped}`}
                   </h1>
 
                   <p className="font-montserrat font-bold text-lg text-[#565656]">
@@ -281,7 +302,7 @@ export default function Overview() {
                 <div className={`h-2 w-full bg-gray-300 rounded-full`}>
                   <div
                     className={`h-full bg-[#22A9FD] rounded-full`}
-                    style={{ width: `${shipped}%` }}
+                    style={{ width: `${shipped}` }}
                   />
                 </div>
               </div>
@@ -313,7 +334,7 @@ export default function Overview() {
             </div>
           </div>
 
-          <div className="h-[572px] mt-8 ">
+          <div className="h-[572px] mt-8 overflow-y-scroll">
             <h1 className="font-montserrat font-bold text-4xl">
               Review Orders
             </h1>
@@ -327,10 +348,10 @@ export default function Overview() {
               <h1 className="text-center text-2xl font-montserrat font-bold text-[#393939]">
                 Destination
               </h1>
-              {order?.map((data) => {
+              {order?.slice(0, 3).map((data) => {
                 return (
                   <div
-                    className="col-span-3 grid grid-cols-3 my-4 gap-4 items-center"
+                    className="col-span-3 relative grid grid-cols-3 my-4 gap-4 items-center px-4 py-6"
                     key={data?.id}
                   >
                     <p className="text-center font-hind text-[#565656] text-lg">
@@ -360,6 +381,10 @@ export default function Overview() {
                         </p>
                       </div>
                     </div>
+                    <Link
+                      href={`/Transactions/${data?.OC_Products?.OC_ProductID}`}
+                      className="absolute right-0 -top-1"
+                    ></Link>
                   </div>
                 );
               })}

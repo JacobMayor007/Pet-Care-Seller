@@ -123,7 +123,7 @@ export default function ProductNavigation() {
         unsubscribe();
       }
     };
-  }, [userData[0]?.User_UID]);
+  }, [userData]);
 
   useEffect(() => {
     const closeNotification = (e: MouseEvent) => {
@@ -305,19 +305,19 @@ const UserNotification = () => {
   }, []);
 
   return (
-    <div className="max-w-[500px] w-[482px] h-fit max-h-[542px] bg-white drop-shadow-lg rounded-xl justify-self-center flex flex-col pb-1">
+    <div className="overflow-y-scroll max-w-[500px] w-[482px] h-fit max-h-[542px] bg-white drop-shadow-lg rounded-xl justify-self-center flex flex-col pb-1">
       <h1 className="font-hind text-lg mx-4 mt-4 mb-2">Notifications</h1>
       <div className="h-0.5 border-[#393939] w-full border-[1px] mb-2" />
       {notif.map((data) => {
         return (
           <div
             key={data?.id}
-            className=" drop-shadow-lg grid grid-cols-12 p-1 items-center"
+            className=" drop-shadow-lg grid grid-cols-12 p-1 items-center "
           >
             <div className="m-2 h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
             <div className="grid grid-cols-12 my-2 col-span-11">
               <Link
-                href={`/Provider/Orders/${data?.order_ID}`}
+                href={`/Transactions/${data?.order_ID}`}
                 className="col-span-11 grid grid-cols-12"
                 onClick={() => Notification.readNotification(data?.id || "")}
               >
