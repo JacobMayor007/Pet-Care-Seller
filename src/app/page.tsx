@@ -144,7 +144,7 @@ export default function Home() {
 
     // Cleanup the subscription when the component is unmounted
     return () => unsubscribe();
-  });
+  }, []);
 
   const totalPrice = order.reduce((accumulator, currentValue) => {
     return accumulator + Number(currentValue?.OC_Products?.OC_ProductPrice);
