@@ -102,7 +102,7 @@ export default function ProductNavigation() {
     const getMyNotification = async () => {
       try {
         if (!userData[0]?.User_UID) {
-          console.log("No doctor UID found.");
+          console.log("No seller UID found.");
           return;
         }
 
@@ -158,7 +158,7 @@ export default function ProductNavigation() {
               Dashboard
             </Link>
           </li>
-          <li className="w-44 h-14 flex items-center justify-center font-bold cursor-pointer">
+          <li className="w-32 h-14 flex items-center justify-center font-bold cursor-pointer">
             <div
               className="font-montserrat text-base text-[#006B95] font-bold "
               onClick={() => {
@@ -174,6 +174,14 @@ export default function ProductNavigation() {
               href="/ListOfProducts"
             >
               List of Products
+            </Link>
+          </li>
+          <li className="w-30 h-14 flex items-center justify-center ">
+            <Link
+              className="font-montserrat text-base text-[#006B95] font-bold"
+              href="/Transactions"
+            >
+              Transactions
             </Link>
           </li>
           <li className="w-fit px-4 h-14 flex items-center justify-center">
