@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import ProductNavigation from "../ProductNavigation/page";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { app, db } from "../firebase/config";
-import { isAuthenticate } from "../fetchData/fetchUserData";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Rate } from "antd";
