@@ -22,9 +22,9 @@ interface Product {
   id?: string;
   Seller_PaymentMethod?: string;
   Seller_ProductDescription?: string;
-  Seller_ProductFeatures?: string; // Assuming this is a string representation of an array or object
+  Seller_ProductFeatures?: string;
   Seller_ProductName?: string;
-  Seller_ProductPrice?: string; // Assuming the price comes as a string from Firebase
+  Seller_ProductPrice?: string;
   Seller_StockQuantity?: string;
   Seller_TotalPrice?: number;
   Seller_TypeOfProduct?: string;
@@ -144,7 +144,7 @@ export default function Home() {
 
     // Cleanup the subscription when the component is unmounted
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const totalPrice = order.reduce((accumulator, currentValue) => {
     return accumulator + Number(currentValue?.OC_Products?.OC_ProductPrice);
@@ -414,9 +414,12 @@ export default function Home() {
                     </span>
                     {data?.Seller_ProductPrice}
                   </p>
-                  <button className="bg-[#006B95] text-white p-1 rounded-md">
+                  <Link
+                    href={`/Update/${data?.id}`}
+                    className="bg-[#006B95] text-white p-1 rounded-md flex justify-center items-center"
+                  >
                     Edit Item
-                  </button>
+                  </Link>
                 </div>
               );
             })}

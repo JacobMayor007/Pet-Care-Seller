@@ -54,7 +54,7 @@ export default function Transactions() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const getListOfOrders = async () => {

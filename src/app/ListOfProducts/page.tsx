@@ -8,6 +8,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import ProductNavigation from "../ProductNavigation/page";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPesoSign } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface Product {
   id?: string;
@@ -45,7 +46,7 @@ export default function ListOfProducts() {
 
     // Cleanup the subscription when the component is unmounted
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const myProducts = async () => {
@@ -101,9 +102,12 @@ export default function ListOfProducts() {
                   </span>
                   {data?.Seller_ProductPrice}
                 </p>
-                <button className="bg-[#006B95] text-white p-1 rounded-md">
+                <Link
+                  href={`/Update/${data?.id}`}
+                  className="bg-[#006B95] text-white p-1 rounded-md flex items-center justify-center"
+                >
                   Edit Item
-                </button>
+                </Link>
               </div>
             );
           })}

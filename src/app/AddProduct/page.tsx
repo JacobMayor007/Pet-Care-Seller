@@ -534,7 +534,7 @@ export default function AddProduct() {
             <div className="flex flex-row items-center justify-between">
               <Link
                 className="p-2 w-24 font-hind text-base border-[1px] border-black shadow-sm shadow-slate-500 flex items-center justify-center rounded-lg"
-                href="/Provider"
+                href="/"
               >
                 Cancel
               </Link>
