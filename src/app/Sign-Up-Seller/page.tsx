@@ -1,8 +1,22 @@
 "use client";
 import { auth, provider } from "@/app/firebase/config";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
-import { FacebookAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
-import { doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
+import {
+  FacebookAuthProvider,
+  getAuth,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -85,8 +99,28 @@ export default function RegisterAsProvider() {
         throw new Error("Failed to create user. Please try again.");
       }
 
+      const usersQuery = query(
+        collection(db, "Users"),
+        where("User_Email", "==", formData.email)
+      );
+      const pendingQuery = query(
+        collection(db, "pending_users"),
+        where("User_Email", "==", formData.email)
+      );
+
+      const [usersSnapshot, pendingSnapshot] = await Promise.all([
+        getDocs(usersQuery),
+        getDocs(pendingQuery),
+      ]);
+
+      if (!usersSnapshot.empty || !pendingSnapshot.empty) {
+        alert("This email is already registered or pending approval");
+        setIsSubmitting(false);
+        return;
+      }
+
       // Add user data to Firestore
-      const userRef = doc(db, "Users", res.user.uid);
+      const userRef = doc(db, "pending_users", res.user.uid);
       await setDoc(userRef, {
         User_Name: formData.fName + " " + formData.lName,
         User_Email: formData.email,
@@ -121,7 +155,9 @@ export default function RegisterAsProvider() {
         businessName: "",
       });
 
-      router.push("/");
+      await signOut(auth);
+
+      router.push("/pending-approval");
     } catch (error) {
       console.error("Error during sign-up:", error);
     } finally {
@@ -146,7 +182,7 @@ export default function RegisterAsProvider() {
       const result = await signInWithPopup(auth, provider);
       console.log(result.providerId);
 
-      const userRef = doc(db, "Users", result.user.uid);
+      const userRef = doc(db, "pending_users", result.user.uid);
       await setDoc(userRef, {
         User_Name: result.user.displayName,
         User_Email: result.user.email,
@@ -166,10 +202,11 @@ export default function RegisterAsProvider() {
         },
         createdAt: Timestamp.now(),
       });
+
+      await signOut(auth);
+
       if (result) {
-        router.push("/");
-      } else {
-        router.push("/Sign-Up-Seller");
+        router.push("/pending-approval");
       }
     } catch (error) {
       console.log(error);
@@ -194,7 +231,7 @@ export default function RegisterAsProvider() {
         getAuth(),
         new FacebookAuthProvider()
       );
-      const userRef = doc(db, "Users", result.user.uid);
+      const userRef = doc(db, "pending_users", result.user.uid);
       await setDoc(userRef, {
         User_Name: result.user.displayName,
         User_Email: result.user.email,
@@ -214,12 +251,12 @@ export default function RegisterAsProvider() {
         },
         createdAt: Timestamp.now(),
       });
+
+      await signOut(auth);
+
       if (result) {
-        router.push("/");
-      } else {
-        router.push("/Sign-Up-Seller");
+        router.push("/pending-approval");
       }
-      console.log("Facebook Sign In", result);
     } catch (err) {
       console.log(err);
     }
@@ -409,8 +446,7 @@ export default function RegisterAsProvider() {
                       event.preventDefault();
                     }
                   }}
-                  maxLength={11}
-                  max={11}
+                  maxLength={10}
                   className="h-12 w-full outline-none text-base font-hind px-2 [&::-webkit-inner-spin-button]:appearance-none"
                   value={formData.contact}
                   onChange={(e) =>
@@ -538,7 +574,7 @@ export default function RegisterAsProvider() {
                 </span>
               </label>
             </div>
-            <div>
+            <div className={usingAuth ? `hidden` : `block`}>
               <button
                 type="submit"
                 id="signup-button"
