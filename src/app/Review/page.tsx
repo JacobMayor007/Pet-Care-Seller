@@ -189,7 +189,7 @@ const Review = () => {
         const docRef = await addDoc(collection(db, "products"), productData);
         console.log("Document written with ID:", docRef.id);
         setConfirm(false);
-        router.push("/Provider");
+        router.push("/");
         window.localStorage.clear();
       } else {
         console.log("Duplicate product found. Document not added.");
