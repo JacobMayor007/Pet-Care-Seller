@@ -155,12 +155,6 @@ const Review = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const fullName = userData
-      .map((user) => `${user.User_FName} ${user.User_LName}`)
-      .join(", ");
-
-    console.log(fullName);
-
     try {
       const q = query(
         collection(db, "products"),
@@ -173,7 +167,6 @@ const Review = () => {
         const productData = {
           Seller_ProductName: productName,
           Seller_ProductDescription: productDescription,
-          Seller_ProductFeatures: productFeature,
           Seller_ProductPrice: productPrice,
           Seller_PaymentMethod: Array.isArray(typeOfPayment)
             ? typeOfPayment.join(", ")
@@ -181,7 +174,7 @@ const Review = () => {
           Seller_TotalPrice: totalPrice,
           Seller_UserID: userId,
           Seller_StockQuantity: stock,
-          Seller_UserFullName: fullName,
+          Seller_UserFullName: userData[0]?.User_Name,
           Seller_TypeOfProduct: typeOfProduct,
           Seller_CreatedAt: Timestamp.now(),
         };

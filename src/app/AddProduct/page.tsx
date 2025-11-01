@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { app } from "../firebase/config";
-import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Select } from "antd";
@@ -31,12 +30,6 @@ export default function AddProduct() {
   //   },
   // ];
 
-  interface Feature {
-    id: string;
-    name: string;
-    price: string;
-  }
-
   type OptionValue = string;
 
   const [typeOfPayment, setTypeOfPayment] = useState<OptionValue[]>([]);
@@ -50,7 +43,6 @@ export default function AddProduct() {
   const [preview, setPreview] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
   const [productPrice, setProductPrice] = useState<string | number>(0);
-  const [productFeature, setProductFeatures] = useState<Feature[]>([]);
   const [typeOfProduct, setTypeOfProduct] = useState<string>("");
   const [stock, setStock] = useState<string | number>(0);
   const [errorMessage, setErrorMessage] = useState(false);
@@ -87,7 +79,6 @@ export default function AddProduct() {
       const savedDescription = localStorage.getItem("Product Description:");
       const savedPrice = localStorage.getItem("Product Price:");
       const savedName = localStorage.getItem("Product Name:");
-      const savedFeatures = localStorage.getItem("Product Features:");
       const savedStock = localStorage.getItem("Stock:");
       const savedType = localStorage.getItem("Type of Product:");
 
@@ -105,7 +96,6 @@ export default function AddProduct() {
       if (savedDescription) setProductDescription(savedDescription);
       if (savedPrice) setProductPrice(savedPrice);
       if (savedName) setProductName(savedName);
-      if (savedFeatures) setProductFeatures(JSON.parse(savedFeatures));
     }
   }, []);
 
@@ -116,7 +106,6 @@ export default function AddProduct() {
       localStorage.setItem("Type Of Payment:", JSON.stringify(typeOfPayment));
       localStorage.setItem("Product Price:", productPrice.toString());
       localStorage.setItem("Product Name:", productName);
-      localStorage.setItem("Product Features:", JSON.stringify(productFeature));
       localStorage.setItem("Stock:", stock.toString());
       localStorage.setItem("Type of Product:", typeOfProduct);
     }
@@ -125,7 +114,6 @@ export default function AddProduct() {
     typeOfPayment,
     productPrice,
     productName,
-    productFeature,
     stock,
     typeOfProduct,
   ]);
@@ -139,37 +127,6 @@ export default function AddProduct() {
       }
       setPreview(base64);
     }
-  };
-
-  const addFeatures = (e: React.MouseEvent) => {
-    e.preventDefault();
-
-    const _addFeatures = [...productFeature];
-    _addFeatures.push({
-      id: uuidv4(),
-      name: "",
-      price: "",
-    });
-    setProductFeatures(_addFeatures);
-  };
-
-  const removeFeatures = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-
-    let _addFeatures = [...productFeature];
-    _addFeatures = _addFeatures.filter((feature) => feature.id !== id);
-    setProductFeatures(_addFeatures);
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string
-  ) => {
-    const { name, value } = e.target;
-    const updatedFeatures = productFeature.map((feature) =>
-      feature.id === id ? { ...feature, [name]: value } : feature
-    );
-    setProductFeatures(updatedFeatures);
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -345,64 +302,6 @@ export default function AddProduct() {
               ) : (
                 <div></div>
               )}
-            </div>
-            <div className="flex flex-col gap-2 bg-[#86B2B4] py-8 px-8 rounded-xl ">
-              <div
-                className={
-                  productFeature.length > 0
-                    ? `flex flex-col gap-2  items-center py-5 rounded-lg `
-                    : `hidden`
-                }
-              >
-                {productFeature.map((feature) => (
-                  <div key={feature.id} className="">
-                    <div className="xl:grid xl:grid-cols-[100px_200px_150px_200px_50px] xl:gap-3 items-center">
-                      <label
-                        htmlFor="name"
-                        className="text-base font-hind font-medium text-white"
-                      >
-                        Feature:
-                      </label>
-                      <input
-                        className="h-10 border-white border-[1px] rounded-md text-base font-hind font-normal px-2 bg-[#86B2B4] outline-none text-white"
-                        type="text"
-                        name="name"
-                        id="feature-name"
-                        value={feature.name}
-                        onChange={(e) => handleInputChange(e, feature.id)}
-                      />
-                      <label
-                        htmlFor="price"
-                        className="text-base font-hind font-medium text-white"
-                      >
-                        Price on Feature:
-                      </label>
-                      <input
-                        className="h-10 outline-none text-white border-white border-[1px] rounded-md text-base font-hind font-normal px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-[#86B2B4]"
-                        type="number"
-                        name="price"
-                        id="feature-price"
-                        value={feature.price}
-                        onChange={(e) => handleInputChange(e, feature.id)}
-                      />
-                      <span
-                        className="h-7 w-7 mt-5 xl:mt-0 rounded-full hover:bg-slate-500 hover:text-white flex items-center justify-center font-bold cursor-pointer border-[1px] border-white"
-                        onClick={(e) => removeFeatures(feature.id, e)}
-                      >
-                        -
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <button
-                  className="h-12 w-auto px-4 rounded-lg  border-white border-[1px] font-hind  font-medium tracking-wide cursor-pointer text-white"
-                  onClick={addFeatures}
-                >
-                  Add More Feature +
-                </button>
-              </div>
             </div>
 
             <div className="flex flex-col gap-4 bg-[#86B2B4] py-8 px-16 rounded-xl">

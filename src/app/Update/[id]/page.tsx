@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Select } from "antd";
@@ -13,19 +12,8 @@ import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { app } from "@/app/firebase/config";
 import ProductNavigation from "@/app/ProductNavigation/page";
 
-interface Feature {
-  id: string;
-  name: string;
-  price: string;
-}
-
 interface ProductId {
   params: Promise<{ id: string }>;
-}
-
-interface ProductFeature {
-  name: string;
-  price: string;
 }
 
 type OptionValue = string;
@@ -37,7 +25,6 @@ export default function UpdateProduct({ params }: ProductId) {
   const [preview, setPreview] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
   const [productPrice, setProductPrice] = useState<string | number>(0);
-  const [productFeature, setProductFeatures] = useState<Feature[]>([]);
   const [typeOfProduct, setTypeOfProduct] = useState<string>("");
   const [stock, setStock] = useState<string | number>(0);
   const [errorMessage, setErrorMessage] = useState(false);
@@ -81,36 +68,6 @@ export default function UpdateProduct({ params }: ProductId) {
             setTypeOfPayment([productData.Seller_PaymentMethod]);
           }
         }
-
-        // Handle product features
-        if (productData.Seller_ProductFeatures) {
-          if (Array.isArray(productData.Seller_ProductFeatures)) {
-            setProductFeatures(
-              productData.Seller_ProductFeatures.map(
-                (feat: ProductFeature) => ({
-                  id: uuidv4(),
-                  name: feat.name || "",
-                  price: feat.price || "",
-                })
-              )
-            );
-          } else if (typeof productData.Seller_ProductFeatures === "string") {
-            try {
-              const parsedFeatures: ProductFeature[] = JSON.parse(
-                productData.Seller_ProductFeatures
-              );
-              setProductFeatures(
-                parsedFeatures.map((feat) => ({
-                  id: uuidv4(),
-                  name: feat.name || "",
-                  price: feat.price || "",
-                }))
-              );
-            } catch (e) {
-              console.error("Error parsing features", e);
-            }
-          }
-        }
       } else {
         console.log("No such product!");
         router.push("/");
@@ -147,35 +104,6 @@ export default function UpdateProduct({ params }: ProductId) {
     }
   };
 
-  const addFeatures = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setProductFeatures([
-      ...productFeature,
-      {
-        id: uuidv4(),
-        name: "",
-        price: "",
-      },
-    ]);
-  };
-
-  const removeFeatures = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    setProductFeatures(productFeature.filter((feature) => feature.id !== id));
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: string
-  ) => {
-    const { name, value } = e.target;
-    setProductFeatures(
-      productFeature.map((feature) =>
-        feature.id === id ? { ...feature, [name]: value } : feature
-      )
-    );
-  };
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -208,7 +136,7 @@ export default function UpdateProduct({ params }: ProductId) {
         Seller_TypeOfProduct: typeOfProduct,
         Seller_StockQuantity: stock,
         Seller_PaymentMethod: typeOfPayment,
-        Seller_ProductFeatures: productFeature,
+
         imageUrl: preview,
         updatedAt: new Date().toISOString(),
       });
@@ -361,60 +289,6 @@ export default function UpdateProduct({ params }: ProductId) {
                   ))}
                 </div>
               )}
-            </div>
-            <div className="flex flex-col gap-2 bg-[#86B2B4] py-8 px-8 rounded-xl">
-              {productFeature.length > 0 && (
-                <div className="flex flex-col gap-2 items-center py-5 rounded-lg">
-                  {productFeature.map((feature) => (
-                    <div key={feature.id}>
-                      <div className="xl:grid xl:grid-cols-[100px_200px_150px_200px_50px] xl:gap-3 items-center">
-                        <label
-                          htmlFor="name"
-                          className="text-base font-hind font-medium text-white"
-                        >
-                          Feature:
-                        </label>
-                        <input
-                          className="h-10 border-white border-[1px] rounded-md text-base font-hind font-normal px-2 bg-[#86B2B4] outline-none text-white"
-                          type="text"
-                          name="name"
-                          id="feature-name"
-                          value={feature.name}
-                          onChange={(e) => handleInputChange(e, feature.id)}
-                        />
-                        <label
-                          htmlFor="price"
-                          className="text-base font-hind font-medium text-white"
-                        >
-                          Price on Feature:
-                        </label>
-                        <input
-                          className="h-10 outline-none text-white border-white border-[1px] rounded-md text-base font-hind font-normal px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-[#86B2B4]"
-                          type="number"
-                          name="price"
-                          id="feature-price"
-                          value={feature.price}
-                          onChange={(e) => handleInputChange(e, feature.id)}
-                        />
-                        <span
-                          className="h-7 w-7 mt-5 xl:mt-0 rounded-full hover:bg-slate-500 hover:text-white flex items-center justify-center font-bold cursor-pointer border-[1px] border-white"
-                          onClick={(e) => removeFeatures(feature.id, e)}
-                        >
-                          -
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div>
-                <button
-                  className="h-12 w-auto px-4 rounded-lg border-white border-[1px] font-hind font-medium tracking-wide cursor-pointer text-white"
-                  onClick={addFeatures}
-                >
-                  Add More Feature +
-                </button>
-              </div>
             </div>
 
             <div className="flex flex-col gap-4 bg-[#86B2B4] py-8 px-16 rounded-xl">

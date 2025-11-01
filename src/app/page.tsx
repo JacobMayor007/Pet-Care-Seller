@@ -119,14 +119,6 @@ export default function Home() {
     fetchOrders();
   }, [userId]);
 
-  const units: number = totalOrders || 0;
-  const pendingUnits = totalOrders || 0;
-  const pending: number = (pendingUnits / units) * 100;
-  const shippedUnits = totalOrders || 0;
-  const shipped: number = (shippedUnits / units) * 100;
-  const deliveredUnits = totalOrders || 0;
-  const delivered: number = (deliveredUnits / units) * 100;
-
   useEffect(() => {
     const auth = getAuth(app);
 
@@ -250,87 +242,15 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-[30%_66%] gap-8 w-full h-full">
           <div className="mt-8">
-            {" "}
             <h1 className="font-montserrat font-bold text-4xl row-span-1">
               Order Summary
             </h1>
-            <div className="h-[572px] grid grid-rows-[140px_140px_140px] gap-14 ">
-              <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3">
-                <p className="text-xl font-montserrat font-bold text-[#565656]">
-                  Pending Orders
-                </p>
-                <div className="flex flex-row items-center justify-between ">
-                  <h1
-                    className={
-                      totalOrders === 0
-                        ? `text-xl font-semibold`
-                        : `text-3xl font-hind font-semibold`
-                    }
-                  >
-                    {totalOrders === 0 ? `You have no orders` : `${pending}`}
-                  </h1>
-                  <p className="font-montserrat font-bold text-lg text-[#565656]">
-                    {pendingUnits} / {units}
-                  </p>
-                </div>
-                <div className={`h-2 w-full bg-gray-300 rounded-full`}>
-                  <div
-                    className={`h-full bg-[#22A9FD] rounded-full`}
-                    style={{ width: `${pending}` }}
-                  />
-                </div>
-              </div>
-              <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3">
-                <p className="text-xl font-montserrat font-bold text-[#565656]">
-                  Shipped Orders
-                </p>
-                <div className="flex items-center justify-between">
-                  <h1
-                    className={
-                      totalOrders === 0
-                        ? `text-xl font-semibold`
-                        : `text-3xl font-hind font-semibold`
-                    }
-                  >
-                    {totalOrders === 0 ? `You have no orders` : `${shipped}`}
-                  </h1>
+            <div className="h-[372px] grid grid-rows-[140px_140px_140px] gap-14 ">
+              <PendingOrders />
 
-                  <p className="font-montserrat font-bold text-lg text-[#565656]">
-                    {shippedUnits} / {units}
-                  </p>
-                </div>
-                <div className={`h-2 w-full bg-gray-300 rounded-full`}>
-                  <div
-                    className={`h-full bg-[#22A9FD] rounded-full`}
-                    style={{ width: `${shipped}` }}
-                  />
-                </div>
-              </div>
-              <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3">
-                <p className="text-xl font-montserrat font-bold text-[#565656]">
-                  Delivered Orders
-                </p>
-                <div className="flex items-center justify-between">
-                  <h1
-                    className={
-                      totalOrders === 0
-                        ? `text-xl font-semibold`
-                        : `text-3xl font-hind font-semibold`
-                    }
-                  >
-                    {totalOrders === 0 ? `You have no orders` : `${delivered}`}
-                  </h1>
-                  <p className="font-montserrat font-bold text-lg text-[#565656]">
-                    {deliveredUnits} / {units}
-                  </p>
-                </div>
-                <div className={`h-2 w-full bg-gray-300 rounded-full`}>
-                  <div
-                    className={`h-full bg-[#22A9FD] rounded-full`}
-                    style={{ width: `${shipped}%` }}
-                  />
-                </div>
-              </div>
+              <ShippedOrders />
+
+              <DeliveredOrders />
             </div>
           </div>
 
@@ -391,7 +311,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="pb-5">
+        <div className="pb-5 mt-10">
           <div className="grid grid-cols-4 gap-6 grid-rows-[300px]">
             {userProduct.map((data, index) => {
               return (
@@ -402,9 +322,6 @@ export default function Home() {
                   <div className="flex justify-center ">
                     <FontAwesomeIcon icon={faFileShield} className="text-8xl" />
                   </div>
-                  <h1 className="font-hind text-[#006B95] tracking-wide">
-                    37 Orders {`(This month)`}
-                  </h1>
                   <p className="text-[#565656] font-hind font-semibold text-sm">
                     {data?.Seller_ProductName}
                   </p>
@@ -425,6 +342,201 @@ export default function Home() {
             })}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PendingOrders() {
+  const [userId, setUserId] = useState("");
+  const [order, setOrder] = useState<Orders[]>([]);
+  const router = useRouter();
+
+  const pendingCount = order.filter(
+    (data) => data.OC_Status === "pending"
+  ).length;
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!userId) return;
+      const orders = await totalOrder(userId);
+      setOrder(
+        orders.map((order: Orders) => ({
+          ...order,
+          OC_OrderAt: order?.OC_OrderAt
+            ? dayjs(order?.OC_OrderAt.toDate())
+            : null,
+        }))
+      );
+    };
+
+    fetchOrders();
+  }, [userId]);
+
+  useEffect(() => {
+    const auth = getAuth(app);
+
+    // Listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Retrieve the user's unique ID
+        setUserId(user.uid);
+      } else {
+        // No user is signed in
+        setUserId("");
+        router.push("/Login");
+      }
+    });
+
+    // Cleanup the subscription when the component is unmounted
+    return () => unsubscribe();
+  }, [router]);
+
+  return (
+    <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3 ">
+      <p className="text-xl font-montserrat font-bold text-[#565656]">
+        Pending Orders
+      </p>
+      <div className="flex flex-row items-center justify-between ">
+        <h1
+          className={
+            order.length === 0
+              ? `text-xl font-semibold`
+              : `text-3xl font-hind font-semibold`
+          }
+        >
+          {order.length === 0 ? `You have no orders` : `${pendingCount}`}
+        </h1>
+      </div>
+    </div>
+  );
+}
+
+function ShippedOrders() {
+  const [userId, setUserId] = useState("");
+  const [order, setOrder] = useState<Orders[]>([]);
+  const router = useRouter();
+
+  const shippedCount = order.filter(
+    (data) => data.OC_Status === "shipped"
+  ).length;
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!userId) return;
+      const orders = await totalOrder(userId);
+      setOrder(
+        orders.map((order: Orders) => ({
+          ...order,
+          OC_OrderAt: order?.OC_OrderAt
+            ? dayjs(order?.OC_OrderAt.toDate())
+            : null,
+        }))
+      );
+    };
+
+    fetchOrders();
+  }, [userId]);
+
+  useEffect(() => {
+    const auth = getAuth(app);
+
+    // Listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Retrieve the user's unique ID
+        setUserId(user.uid);
+      } else {
+        // No user is signed in
+        setUserId("");
+        router.push("/Login");
+      }
+    });
+
+    // Cleanup the subscription when the component is unmounted
+    return () => unsubscribe();
+  }, [router]);
+
+  return (
+    <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3">
+      <p className="text-xl font-montserrat font-bold text-[#565656]">
+        Shipped Orders
+      </p>
+      <div className="flex items-center justify-between">
+        <h1
+          className={
+            order.length === 0
+              ? `text-xl font-semibold`
+              : `text-3xl font-hind font-semibold`
+          }
+        >
+          {order.length === 0 ? `You have no orders` : `${shippedCount}`}
+        </h1>
+      </div>
+    </div>
+  );
+}
+
+function DeliveredOrders() {
+  const [userId, setUserId] = useState("");
+  const [order, setOrder] = useState<Orders[]>([]);
+  const router = useRouter();
+
+  const deliveredCount = order.filter(
+    (data) => data.OC_Status === "paid"
+  ).length;
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!userId) return;
+      const orders = await totalOrder(userId);
+      setOrder(
+        orders.map((order: Orders) => ({
+          ...order,
+          OC_OrderAt: order?.OC_OrderAt
+            ? dayjs(order?.OC_OrderAt.toDate())
+            : null,
+        }))
+      );
+    };
+
+    fetchOrders();
+  }, [userId]);
+
+  useEffect(() => {
+    const auth = getAuth(app);
+
+    // Listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Retrieve the user's unique ID
+        setUserId(user.uid);
+      } else {
+        // No user is signed in
+        setUserId("");
+        router.push("/Login");
+      }
+    });
+
+    // Cleanup the subscription when the component is unmounted
+    return () => unsubscribe();
+  }, [router]);
+
+  return (
+    <div className="bg-white drop-shadow-xl shadow-black rounded-xl p-5 flex flex-col gap-3">
+      <p className="text-xl font-montserrat font-bold text-[#565656]">
+        Delivered Orders
+      </p>
+      <div className="flex items-center justify-between">
+        <h1
+          className={
+            order.length === 0
+              ? `text-xl font-semibold`
+              : `text-3xl font-hind font-semibold`
+          }
+        >
+          {order.length === 0 ? `You have no orders` : `${deliveredCount}`}
+        </h1>
       </div>
     </div>
   );
