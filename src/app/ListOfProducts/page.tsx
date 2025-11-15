@@ -90,9 +90,7 @@ export default function ListOfProducts() {
                 <div className="flex justify-center ">
                   {data?.Seller_ProductName?.charAt(0)}
                 </div>
-                <h1 className="font-hind text-[#006B95] tracking-wide">
-                  37 Orders {`(This month)`}
-                </h1>
+
                 <p className="text-[#565656] font-hind font-semibold text-sm">
                   {data?.Seller_ProductName}
                 </p>
